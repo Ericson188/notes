@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title> Music Preview Player</title>
+    <title>Harmony Music Player</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
-            --primary: #EF5466;
-            --primary-dark: #D43F51;
-            --secondary: #00C7F2;
-            --dark: #2D3748;
-            --light: #F7FAFC;
-            --gray: #E2E8F0;
-            --text: #4A5568;
+            --primary: #8e44ad;
+            --primary-light: #9b59b6;
+            --secondary: #3498db;
+            --dark: #1a1a2e;
+            --darker: #16213e;
+            --light: #e2e8f0;
+            --text: #f1f1f1;
+            --text-secondary: #b8c2cc;
         }
         
         * {
@@ -23,83 +25,67 @@
         
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: linear-gradient(to right, var(--darker), var(--dark));
             min-height: 100vh;
-            padding: 20px;
             color: var(--text);
+            padding: 0;
+            line-height: 1.6;
         }
         
-        .container {
+        .app-container {
             max-width: 800px;
             margin: 0 auto;
-            background-color: white;
+            background-color: rgba(26, 26, 46, 0.8);
+            backdrop-filter: blur(10px);
             border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            padding-bottom: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            min-height: 100vh;
         }
         
         header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: white;
-            padding: 30px 20px;
+            padding: 30px 25px 25px;
             text-align: center;
             position: relative;
-            overflow: hidden;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
         }
         
-        header::before {
-            content: "";
-            position: absolute;
-            top: -50px;
-            right: -50px;
-            width: 150px;
-            height: 150px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-        }
-        
-        header::after {
-            content: "";
-            position: absolute;
-            bottom: -80px;
-            left: -30px;
-            width: 200px;
-            height: 200px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
+        .header-content {
+            position: relative;
+            z-index: 2;
         }
         
         h1 {
-            font-size: 1.8rem;
-            margin-bottom: 10px;
-            position: relative;
-            z-index: 1;
+            font-size: 2rem;
+            margin-bottom: 8px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
         
         .subtitle {
             font-weight: 300;
             opacity: 0.9;
-            position: relative;
-            z-index: 1;
+            font-size: 1rem;
         }
         
         .search-container {
             padding: 20px;
-            background-color: white;
             position: relative;
-            z-index: 2;
-            margin-top: -20px;
-            border-radius: 16px 16px 0 0;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
         }
         
-        .input-group {
+        .search-box {
             display: flex;
-            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 50px;
             overflow: hidden;
-            box-shadow: 0 4px 10px rgba(239, 84, 102, 0.2);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .search-box:focus-within {
+            box-shadow: 0 0 0 3px rgba(142, 68, 173, 0.3);
+            border-color: var(--primary);
         }
         
         input {
@@ -108,26 +94,34 @@
             border: none;
             font-size: 16px;
             outline: none;
-            background-color: var(--light);
+            background: transparent;
+            color: var(--text);
         }
         
-        button {
+        input::placeholder {
+            color: var(--text-secondary);
+        }
+        
+        .search-btn {
             padding: 0 25px;
-            background-color: var(--primary);
+            background: var(--primary);
             color: white;
             border: none;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        button:hover {
-            background-color: var(--primary-dark);
+        .search-btn:hover {
+            background: var(--primary-light);
         }
         
         #results {
-            padding: 0 20px;
+            padding: 0 20px 30px;
         }
         
         .track {
@@ -135,35 +129,24 @@
             align-items: center;
             padding: 15px;
             margin-bottom: 15px;
-            background-color: white;
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--primary);
         }
         
         .track:hover {
-            transform: translateY(-3px);
-        }
-        
-        .track::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 5px;
-            height: 100%;
-            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
         }
         
         .track-cover {
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             border-radius: 8px;
             object-fit: cover;
             margin-right: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
         
         .track-info {
@@ -177,12 +160,12 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            color: white;
         }
         
         .track-artist {
             font-size: 0.9rem;
-            color: var(--text);
-            opacity: 0.8;
+            color: var(--text-secondary);
             margin-bottom: 5px;
             white-space: nowrap;
             overflow: hidden;
@@ -191,35 +174,39 @@
         
         .track-album {
             font-size: 0.8rem;
-            color: var(--text);
-            opacity: 0.6;
+            color: var(--text-secondary);
+            opacity: 0.8;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
         
+        .audio-container {
+            margin-top: 12px;
+            width: 100%;
+        }
+        
         audio {
             width: 100%;
-            margin-top: 10px;
-            border-radius: 20px;
+            border-radius: 10px;
         }
         
         audio::-webkit-media-controls-panel {
-            background-color: var(--light);
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
         }
         
         .loading {
             text-align: center;
-            padding: 40px 20px;
-            color: var(--text);
+            padding: 50px 20px;
         }
         
         .loading-spinner {
-            border: 4px solid var(--gray);
+            border: 4px solid rgba(255, 255, 255, 0.1);
             border-top: 4px solid var(--primary);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
         }
@@ -231,30 +218,46 @@
         
         .error {
             padding: 15px;
-            background-color: #FFEBEE;
-            color: #D32F2F;
+            background: rgba(255, 0, 0, 0.1);
+            color: #ff6b6b;
             border-radius: 8px;
             text-align: center;
             margin: 20px;
-            font-weight: 500;
+            border-left: 4px solid #ff6b6b;
         }
         
         .empty-state {
             text-align: center;
-            padding: 40px 20px;
-            color: var(--text);
+            padding: 50px 20px;
+            color: var(--text-secondary);
         }
         
         .empty-icon {
-            font-size: 3rem;
+            font-size: 3.5rem;
             margin-bottom: 15px;
-            color: var(--gray);
+            color: var(--primary);
+            opacity: 0.7;
+        }
+        
+        .empty-state h3 {
+            color: white;
+            margin-bottom: 10px;
+            font-weight: 500;
         }
         
         /* Mobile specific styles */
         @media (max-width: 600px) {
+            .app-container {
+                border-radius: 0;
+                min-height: 100vh;
+            }
+            
+            header {
+                padding: 25px 20px;
+            }
+            
             h1 {
-                font-size: 1.5rem;
+                font-size: 1.6rem;
             }
             
             .subtitle {
@@ -264,25 +267,28 @@
             .track {
                 flex-direction: column;
                 align-items: flex-start;
+                padding: 15px;
             }
             
             .track-cover {
                 width: 100%;
                 height: auto;
+                aspect-ratio: 1;
                 margin-right: 0;
                 margin-bottom: 15px;
             }
             
-            .input-group {
+            .search-box {
                 flex-direction: column;
                 border-radius: 12px;
             }
             
             input {
+                padding: 15px;
                 border-radius: 12px 12px 0 0 !important;
             }
             
-            button {
+            .search-btn {
                 padding: 15px;
                 border-radius: 0 0 12px 12px !important;
             }
@@ -291,24 +297,30 @@
 </head>
 <body>
 
-<div class="container">
+<div class="app-container">
     <header>
-        <h1>🎧 Music Preview Player</h1>
-        <p class="subtitle">Discover & play song previews from Deezer</p>
+        <div class="header-content">
+            <h1><i class="fas fa-music" style="margin-right: 10px;"></i>Harmony</h1>
+            <p class="subtitle">Discover and play music previews</p>
+        </div>
     </header>
     
     <div class="search-container">
-        <div class="input-group">
-            <input type="text" id="searchInput" placeholder="Search for songs or artists..." autocomplete="off">
-            <button onclick="searchMusic()">Search</button>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Artist, song, or album..." autocomplete="off">
+            <button class="search-btn" onclick="searchMusic()">
+                <i class="fas fa-search" style="margin-right: 8px;"></i> Search
+            </button>
         </div>
     </div>
     
     <div id="results">
         <div class="empty-state">
-            <div class="empty-icon">🔍</div>
-            <h3>Search for music</h3>
-            <p>Enter an artist or song name to find previews</p>
+            <div class="empty-icon">
+                <i class="fas fa-headphones"></i>
+            </div>
+            <h3>Start Exploring Music</h3>
+            <p>Search for your favorite artists or songs to play previews</p>
         </div>
     </div>
 </div>
@@ -361,9 +373,11 @@
                     <div class="track-title">${track.title}</div>
                     <div class="track-artist">${track.artist.name}</div>
                     <div class="track-album">${track.album.title}</div>
-                    <audio controls src="${track.preview}">
-                        Your browser does not support the audio element.
-                    </audio>
+                    <div class="audio-container">
+                        <audio controls src="${track.preview}">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
                 </div>
             `;
             resultsDiv.appendChild(div);
