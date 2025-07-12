@@ -124,6 +124,20 @@
             padding: 0 20px 30px;
         }
         
+        .section-title {
+            font-size: 1.3rem;
+            margin: 25px 0 15px;
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+        
         .track {
             display: flex;
             align-items: center;
@@ -179,6 +193,12 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+        
+        .track-release {
+            font-size: 0.7rem;
+            color: var(--secondary);
+            margin-top: 3px;
         }
         
         .audio-container {
@@ -328,6 +348,7 @@
 <script>
     let currentTracks = [];
     let currentTrackIndex = 0;
+    let currentArtistId = null;
     
     function searchMusic() {
         const query = document.getElementById("searchInput").value.trim();
@@ -345,19 +366,16 @@
             </div>
         `;
         
-        // Remove any previous JSONP script
-        const oldScript = document.querySelector('script[src^="https://api.deezer.com/search"]');
-        if (oldScript) {
-            oldScript.remove();
-        }
+        // Remove any previous JSONP scripts
+        document.querySelectorAll('script[src^="https://api.deezer.com"]').forEach(script => script.remove());
         
-        // Create new JSONP script
-        const script = document.createElement('script');
-        script.src = `https://api.deezer.com/search?q=${encodeURIComponent(query)}&output=jsonp&callback=displayResults`;
-        document.body.appendChild(script);
+        // First search for tracks matching the query
+        const searchScript = document.createElement('script');
+        searchScript.src = `https://api.deezer.com/search?q=${encodeURIComponent(query)}&output=jsonp&callback=handleInitialSearch`;
+        document.body.appendChild(searchScript);
     }
 
-    function displayResults(data) {
+    function handleInitialSearch(data) {
         const resultsDiv = document.getElementById("results");
         
         if (!data || !data.data || data.data.length === 0) {
@@ -365,45 +383,116 @@
             return;
         }
         
-        resultsDiv.innerHTML = '';
-        currentTracks = data.data.slice(0, 6);
-        currentTrackIndex = 0;
+        // Get the first artist ID from search results
+        const artist = data.data[0].artist;
+        currentArtistId = artist.id;
         
-        currentTracks.forEach((track, index) => {
+        // Now fetch all tracks by this artist and new releases
+        fetchArtistTracks(artist.id);
+        fetchNewReleases();
+        
+        // Display initial search results
+        displayTracks(data.data.slice(0, 6), "Search Results");
+    }
+    
+    function fetchArtistTracks(artistId) {
+        const script = document.createElement('script');
+        script.src = `https://api.deezer.com/artist/${artistId}/top?limit=50&output=jsonp&callback=displayArtistTracks`;
+        document.body.appendChild(script);
+    }
+    
+    function fetchNewReleases() {
+        const script = document.createElement('script');
+        script.src = `https://api.deezer.com/editorial/0/releases?output=jsonp&callback=displayNewReleases`;
+        document.body.appendChild(script);
+    }
+    
+    function displayArtistTracks(data) {
+        if (data && data.data && data.data.length > 0) {
+            displayTracks(data.data, `<i class="fas fa-user"></i> Artist Tracks`, true);
+        }
+    }
+    
+    function displayNewReleases(data) {
+        if (data && data.data && data.data.length > 0) {
+            // Filter to only include tracks from our artist if we have one
+            let newReleases = data.data;
+            if (currentArtistId) {
+                newReleases = data.data.filter(track => 
+                    track.artist && track.artist.id === currentArtistId
+                );
+            }
+            
+            if (newReleases.length > 0) {
+                displayTracks(newReleases.slice(0, 6), `<i class="fas fa-star"></i> New Releases`, true);
+            }
+        }
+    }
+    
+    function displayTracks(tracks, sectionTitle, append = false) {
+        const resultsDiv = document.getElementById("results");
+        
+        if (!append) {
+            resultsDiv.innerHTML = '';
+            currentTracks = [];
+        }
+        
+        if (tracks.length === 0) return;
+        
+        // Create section header
+        const section = document.createElement('div');
+        section.innerHTML = `<div class="section-title">${sectionTitle}</div>`;
+        resultsDiv.appendChild(section);
+        
+        // Add tracks to currentTracks for playback management
+        currentTracks = [...currentTracks, ...tracks];
+        
+        tracks.forEach((track, index) => {
+            const globalIndex = currentTracks.length - tracks.length + index;
             const div = document.createElement("div");
             div.className = "track";
+            
+            // Format release date if available
+            let releaseInfo = '';
+            if (track.release_date) {
+                const releaseDate = new Date(track.release_date);
+                releaseInfo = `<div class="track-release">Released: ${releaseDate.toLocaleDateString()}</div>`;
+            }
+            
             div.innerHTML = `
                 <img class="track-cover" src="${track.album.cover_medium}" alt="Album cover">
                 <div class="track-info">
                     <div class="track-title">${track.title}</div>
                     <div class="track-artist">${track.artist.name}</div>
                     <div class="track-album">${track.album.title}</div>
+                    ${releaseInfo}
                     <div class="audio-container">
-                        <audio id="audio-${index}" controls src="${track.preview}">
+                        <audio id="audio-${globalIndex}" controls src="${track.preview}">
                             Your browser does not support the audio element.
                         </audio>
                     </div>
                 </div>
             `;
-            resultsDiv.appendChild(div);
+            section.appendChild(div);
             
             // Set up event listeners for each audio element
-            const audio = document.getElementById(`audio-${index}`);
-            audio.addEventListener('timeupdate', function() {
-                // When there's 1 second left (at 29 seconds for 30-sec preview)
-                if (this.currentTime >= 29 && !this.dataset.queuedNext) {
-                    this.dataset.queuedNext = true;
-                    playNextTrack(index);
-                }
-            });
-            
-            audio.addEventListener('ended', function() {
-                playNextTrack(index);
-            });
+            const audio = document.getElementById(`audio-${globalIndex}`);
+            if (audio) {
+                audio.addEventListener('timeupdate', function() {
+                    if (this.currentTime >= 29 && !this.dataset.queuedNext) {
+                        this.dataset.queuedNext = true;
+                        playNextTrack(globalIndex);
+                    }
+                });
+                
+                audio.addEventListener('ended', function() {
+                    playNextTrack(globalIndex);
+                });
+            }
         });
         
-        // Auto-play the first track
-        if (currentTracks.length > 0) {
+        // Auto-play the first track if this is the initial load
+        if (!append && currentTracks.length > 0) {
             setTimeout(() => {
                 const firstAudio = document.getElementById('audio-0');
                 if (firstAudio) {
