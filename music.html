@@ -326,6 +326,9 @@
 </div>
 
 <script>
+    let currentTracks = [];
+    let currentTrackIndex = 0;
+    
     function searchMusic() {
         const query = document.getElementById("searchInput").value.trim();
         const resultsDiv = document.getElementById("results");
@@ -363,8 +366,10 @@
         }
         
         resultsDiv.innerHTML = '';
+        currentTracks = data.data.slice(0, 6);
+        currentTrackIndex = 0;
         
-        data.data.slice(0, 6).forEach(track => {
+        currentTracks.forEach((track, index) => {
             const div = document.createElement("div");
             div.className = "track";
             div.innerHTML = `
@@ -374,14 +379,59 @@
                     <div class="track-artist">${track.artist.name}</div>
                     <div class="track-album">${track.album.title}</div>
                     <div class="audio-container">
-                        <audio controls src="${track.preview}">
+                        <audio id="audio-${index}" controls src="${track.preview}">
                             Your browser does not support the audio element.
                         </audio>
                     </div>
                 </div>
             `;
             resultsDiv.appendChild(div);
+            
+            // Set up event listeners for each audio element
+            const audio = document.getElementById(`audio-${index}`);
+            audio.addEventListener('timeupdate', function() {
+                // When there's 1 second left (at 29 seconds for 30-sec preview)
+                if (this.currentTime >= 29 && !this.dataset.queuedNext) {
+                    this.dataset.queuedNext = true;
+                    playNextTrack(index);
+                }
+            });
+            
+            audio.addEventListener('ended', function() {
+                playNextTrack(index);
+            });
         });
+        
+        // Auto-play the first track
+        if (currentTracks.length > 0) {
+            setTimeout(() => {
+                const firstAudio = document.getElementById('audio-0');
+                if (firstAudio) {
+                    firstAudio.play().catch(e => console.log("Auto-play prevented:", e));
+                }
+            }, 500);
+        }
+    }
+    
+    function playNextTrack(currentIndex) {
+        const nextIndex = (currentIndex + 1) % currentTracks.length;
+        currentTrackIndex = nextIndex;
+        
+        // Pause current track
+        const currentAudio = document.getElementById(`audio-${currentIndex}`);
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio.currentTime = 0;
+            currentAudio.removeAttribute('data-queued-next');
+        }
+        
+        // Play next track after a brief delay
+        setTimeout(() => {
+            const nextAudio = document.getElementById(`audio-${nextIndex}`);
+            if (nextAudio) {
+                nextAudio.play().catch(e => console.log("Auto-play prevented:", e));
+            }
+        }, 300);
     }
     
     // Add event listener for Enter key
