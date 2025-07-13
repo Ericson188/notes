@@ -15,6 +15,23 @@
       --border: #ddd;
       --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       --radius: 8px;
+      --bg: #ffffff;
+      --verse-bg: transparent;
+      --highlight-color: #fff9c4;
+    }
+
+    .dark-mode {
+      --primary: #6a8fc5;
+      --primary-dark: #5a7ab5;
+      --secondary: #2d3748;
+      --text: #f0f0f0;
+      --text-light: #b0b0b0;
+      --border: #444;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      --bg: #1a202c;
+      --verse-bg: #2d3748;
+      --highlight-color: #4a5568;
+      background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
     }
 
     * {
@@ -30,15 +47,17 @@
       background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
       min-height: 100vh;
       padding: 1rem;
+      transition: background 0.3s, color 0.3s;
     }
 
     .container {
       max-width: 800px;
       margin: 2rem auto;
-      background: white;
+      background: var(--bg);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow: hidden;
+      transition: background 0.3s, box-shadow 0.3s;
     }
 
     header {
@@ -46,6 +65,7 @@
       color: white;
       padding: 1.5rem;
       text-align: center;
+      position: relative;
     }
 
     h1 {
@@ -56,6 +76,34 @@
     .subtitle {
       font-size: 0.9rem;
       opacity: 0.9;
+    }
+
+    .settings-bar {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 1rem;
+      background: var(--secondary);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .settings-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-icon {
+      background: none;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0.5rem;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: rgba(0, 0, 0, 0.1);
     }
 
     .controls {
@@ -82,6 +130,8 @@
       border-radius: var(--radius);
       font-size: 1rem;
       transition: border-color 0.3s;
+      background: var(--bg);
+      color: var(--text);
     }
 
     select:focus, input:focus {
@@ -133,19 +183,36 @@
       font-size: 0.9rem;
     }
 
+    .chapter-navigation {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .nav-btn {
+      width: auto;
+      padding: 0.5rem 1rem;
+    }
+
     .verses {
       line-height: 1.8;
     }
 
     .verse {
       margin-bottom: 1rem;
-      padding: 0.5rem;
+      padding: 0.8rem;
       border-radius: 4px;
       transition: background 0.2s;
+      background: var(--verse-bg);
+      position: relative;
+    }
+
+    .verse.highlighted {
+      background: var(--highlight-color);
     }
 
     .verse:hover {
-      background: rgba(74, 111, 165, 0.05);
+      background: rgba(74, 111, 165, 0.1);
     }
 
     .verse-num {
@@ -154,6 +221,37 @@
       font-size: 0.8em;
       vertical-align: super;
       margin-right: 0.2rem;
+    }
+
+    .verse-actions {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      display: flex;
+      gap: 0.3rem;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .verse:hover .verse-actions {
+      opacity: 1;
+    }
+
+    .verse-btn {
+      background: rgba(0, 0, 0, 0.1);
+      border: none;
+      border-radius: 4px;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    .verse-btn:hover {
+      background: rgba(0, 0, 0, 0.2);
     }
 
     .loading {
@@ -224,6 +322,41 @@
       .controls, .verses-container {
         padding: 1rem;
       }
+
+      .verse-actions {
+        opacity: 1;
+      }
+    }
+    
+    .verse-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+    
+    .bookmark-date {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      font-style: italic;
+    }
+    
+    .copy-notification {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--primary);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 1000;
+    }
+    
+    .copy-notification.show {
+      opacity: 1;
     }
   </style>
 </head>
@@ -233,6 +366,25 @@
       <h1>Bible Chapter Viewer</h1>
       <p class="subtitle">Explore the Scriptures in different translations</p>
     </header>
+
+    <div class="settings-bar">
+      <div class="settings-group">
+        <button class="btn-icon" id="darkModeToggle" title="Dark Mode">
+          <i class="fas fa-moon"></i>
+        </button>
+        <button class="btn-icon" id="fontIncrease" title="Increase Font Size">
+          <i class="fas fa-text-height"></i> +
+        </button>
+        <button class="btn-icon" id="fontDecrease" title="Decrease Font Size">
+          <i class="fas fa-text-height"></i> -
+        </button>
+      </div>
+      <div class="settings-group">
+        <button class="btn-icon" id="showBookmarks" title="View Bookmarks">
+          <i class="fas fa-bookmark"></i>
+        </button>
+      </div>
+    </div>
 
     <div class="controls">
       <div class="form-row">
@@ -256,7 +408,7 @@
         </div>
       </div>
 
-      <button onclick="loadChapter()">
+      <button id="loadChapterBtn">
         <i class="fas fa-book-open"></i> Read Chapter
       </button>
     </div>
@@ -273,12 +425,13 @@
     </footer>
   </div>
 
+  <div class="copy-notification" id="copyNotification">Verse copied to clipboard!</div>
+
   <script>
     const bibleVersions = [
       { id: "kjv", name: "King James Version (KJV)" },
       { id: "asv", name: "American Standard Version (ASV)" },
       { id: "web", name: "World English Bible (WEB)" },
-      { id: "bsb", name: "Berean Study Bible (BSB)" }
     ];
 
     const bibleBooks = [
@@ -353,6 +506,322 @@
       { id: "rev", name: "Revelation" }
     ];
 
+    // ====== UTILITY FUNCTIONS ======
+    function getCurrentBook() {
+      return document.getElementById('book').value;
+    }
+
+    function getCurrentChapter() {
+      const chapter = document.getElementById('chapter').value;
+      return chapter ? parseInt(chapter) : null;
+    }
+
+    function getCurrentVersion() {
+      return document.getElementById('version').value;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function escapeForAttribute(text) {
+      return escapeHtml(text).replace(/"/g, '&quot;');
+    }
+
+    // ====== BOOKMARK SYSTEM ======
+    function saveBookmark(bookId, bookName, chapter, verse, text) {
+      try {
+        const cleanText = text.trim();
+        const bookmarks = JSON.parse(localStorage.getItem('bibleBookmarks')) || [];
+        
+        const exists = bookmarks.some(bm => 
+          bm.bookId === bookId && 
+          bm.chapter === chapter && 
+          bm.verse === verse
+        );
+        
+        if (exists) {
+          showNotification("This verse is already bookmarked!");
+          return;
+        }
+        
+        bookmarks.push({ 
+          bookId,
+          bookName, 
+          chapter, 
+          verse, 
+          text: cleanText,
+          timestamp: new Date().toISOString() 
+        });
+        
+        localStorage.setItem('bibleBookmarks', JSON.stringify(bookmarks));
+        showNotification("Verse bookmarked successfully!");
+      } catch (error) {
+        console.error("Error saving bookmark:", error);
+        showNotification("Failed to save bookmark. Please try again.");
+      }
+    }
+
+    function showBookmarks() {
+      try {
+        const bookmarks = JSON.parse(localStorage.getItem('bibleBookmarks')) || [];
+        const output = document.getElementById('output');
+        
+        if (bookmarks.length === 0) {
+          output.innerHTML = `
+            <div class="error">
+              <i class="fas fa-info-circle"></i>
+              <p>No bookmarks saved yet!</p>
+            </div>
+          `;
+          return;
+        }
+
+        let html = `
+          <div class="chapter-header">
+            <h2>Your Saved Bookmarks</h2>
+            <div class="chapter-meta">${bookmarks.length} saved verses</div>
+          </div>
+          <div class="verses">
+        `;
+        
+        // Sort by most recent first
+        bookmarks.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        
+        bookmarks.forEach((bm, i) => {
+          html += `
+            <div class="verse">
+              <div class="verse-header">
+                <strong>${escapeHtml(bm.bookName)} ${bm.chapter}:${bm.verse}</strong>
+                <span class="bookmark-date">${new Date(bm.timestamp).toLocaleDateString()}</span>
+              </div>
+              <p>${escapeHtml(bm.text)}</p>
+              <div class="verse-actions">
+                <button onclick="loadBookmarkedVerse('${escapeForAttribute(bm.bookId)}', ${bm.chapter}, ${bm.verse})" 
+                  class="verse-btn" title="Go to verse">
+                  <i class="fas fa-book-open"></i>
+                </button>
+                <button onclick="removeBookmark(${i})" class="verse-btn" title="Remove">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        });
+
+        html += `</div>`;
+        output.innerHTML = html;
+        
+      } catch (error) {
+        console.error("Error showing bookmarks:", error);
+        document.getElementById('output').innerHTML = `
+          <div class="error">
+            <i class="fas fa-exclamation-circle"></i>
+            <p>Error loading bookmarks. Please try again.</p>
+          </div>
+        `;
+      }
+    }
+
+    function removeBookmark(index) {
+      if (!confirm("Are you sure you want to remove this bookmark?")) return;
+      
+      try {
+        const bookmarks = JSON.parse(localStorage.getItem('bibleBookmarks')) || [];
+        if (index >= 0 && index < bookmarks.length) {
+          bookmarks.splice(index, 1);
+          localStorage.setItem('bibleBookmarks', JSON.stringify(bookmarks));
+          showBookmarks();
+        }
+      } catch (error) {
+        console.error("Error removing bookmark:", error);
+        showNotification("Failed to remove bookmark. Please try again.");
+      }
+    }
+
+    function loadBookmarkedVerse(bookId, chapter, verse) {
+      document.getElementById('book').value = bookId;
+      document.getElementById('chapter').value = chapter;
+      
+      loadChapter().then(() => {
+        setTimeout(() => {
+          const verseElement = document.getElementById(`verse-${verse}`);
+          if (verseElement) {
+            verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            verseElement.classList.add('highlighted');
+            setTimeout(() => verseElement.classList.remove('highlighted'), 2000);
+          }
+        }, 500);
+      }).catch(err => {
+        console.error("Error loading bookmarked verse:", err);
+        showNotification("Error loading verse. Please try again.");
+      });
+    }
+
+    // ====== NOTIFICATION SYSTEM ======
+    function showNotification(message) {
+      const notification = document.getElementById('copyNotification');
+      notification.textContent = message;
+      notification.classList.add('show');
+      setTimeout(() => notification.classList.remove('show'), 3000);
+    }
+
+    // ====== CHAPTER NAVIGATION ======
+    function prevChapter() {
+      const chapterInput = document.getElementById('chapter');
+      const currentChapter = getCurrentChapter();
+      if (currentChapter && currentChapter > 1) {
+        chapterInput.value = currentChapter - 1;
+        loadChapter();
+      }
+    }
+
+    function nextChapter() {
+      const chapterInput = document.getElementById('chapter');
+      const currentChapter = getCurrentChapter() || 0;
+      chapterInput.value = currentChapter + 1;
+      loadChapter();
+    }
+
+    // ====== DARK MODE & FONT SIZE ======
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+      updateDarkModeIcon();
+    }
+
+    function updateDarkModeIcon() {
+      const icon = document.getElementById('darkModeToggle').querySelector('i');
+      if (document.body.classList.contains('dark-mode')) {
+        icon.classList.replace('fa-moon', 'fa-sun');
+      } else {
+        icon.classList.replace('fa-sun', 'fa-moon');
+      }
+    }
+
+    function adjustFontSize(delta) {
+      const versesContainer = document.querySelector('.verses');
+      if (!versesContainer) return;
+
+      const currentSize = parseFloat(window.getComputedStyle(versesContainer).fontSize);
+      const newSize = Math.max(12, Math.min(24, currentSize + delta));
+      versesContainer.style.fontSize = `${newSize}px`;
+      localStorage.setItem('fontSize', newSize);
+    }
+
+    // ====== VERSE ACTIONS ======
+    function copyVerse(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        showNotification("Verse copied to clipboard!");
+      }).catch(err => {
+        console.error("Failed to copy verse:", err);
+        showNotification("Failed to copy verse. Please try again.");
+      });
+    }
+
+    function highlightVerse(verseElement) {
+      verseElement.classList.toggle('highlighted');
+    }
+
+    // ====== LOAD CHAPTER ======
+    async function loadChapter() {
+      const version = getCurrentVersion();
+      const bookId = getCurrentBook();
+      const chapter = getCurrentChapter();
+      const output = document.getElementById('output');
+
+      if (!version || !bookId || !chapter) {
+        output.innerHTML = `
+          <div class="error">
+            <i class="fas fa-exclamation-circle"></i>
+            <p>Please select a version, book, and enter a chapter number</p>
+          </div>
+        `;
+        return Promise.reject("Missing required fields");
+      }
+
+      output.innerHTML = `
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Loading chapter...</p>
+        </div>
+      `;
+
+      const url = `https://bible-api.com/${bookId}+${chapter}?translation=${version}`;
+
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Chapter not found. Please check your selection.");
+
+        const data = await response.json();
+        const verses = data.verses;
+
+        if (!verses || verses.length === 0) {
+          throw new Error("No verses found in this chapter.");
+        }
+
+        const bookName = data.book_name;
+        const versionName = bibleVersions.find(v => v.id === version)?.name || version;
+
+        let html = `
+          <div class="chapter-header">
+            <h2 class="chapter-title">${escapeHtml(bookName)} ${chapter}</h2>
+            <div class="chapter-meta">${escapeHtml(versionName)}</div>
+          </div>
+          <div class="chapter-navigation">
+            <button class="nav-btn" onclick="prevChapter()">
+              <i class="fas fa-arrow-left"></i> Previous
+            </button>
+            <button class="nav-btn" onclick="nextChapter()">
+              Next <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+          <div class="verses">
+        `;
+
+        html += verses.map(v => `
+          <div class="verse" id="verse-${v.verse}">
+            <span class="verse-num">${v.verse}</span>
+            ${escapeHtml(v.text)}
+            <div class="verse-actions">
+              <button class="verse-btn" onclick="copyVerse('${escapeForAttribute(bookName)} ${chapter}:${v.verse} - ${escapeForAttribute(v.text)}')" title="Copy">
+                <i class="fas fa-copy"></i>
+              </button>
+              <button class="verse-btn" onclick="highlightVerse(this.parentElement.parentElement)" title="Highlight">
+                <i class="fas fa-highlighter"></i>
+              </button>
+              <button class="verse-btn" onclick="saveBookmark('${escapeForAttribute(bookId)}', '${escapeForAttribute(bookName)}', ${chapter}, ${v.verse}, '${escapeForAttribute(v.text)}')" title="Bookmark">
+                <i class="fas fa-bookmark"></i>
+              </button>
+            </div>
+          </div>
+        `).join('');
+
+        html += `</div>`;
+        output.innerHTML = html;
+
+        // Restore font size if saved
+        const savedFontSize = localStorage.getItem('fontSize');
+        if (savedFontSize) {
+          document.querySelector('.verses').style.fontSize = `${savedFontSize}px`;
+        }
+
+        return Promise.resolve();
+
+      } catch (error) {
+        output.innerHTML = `
+          <div class="error">
+            <i class="fas fa-exclamation-circle"></i>
+            <p>${escapeHtml(error.message)}</p>
+          </div>
+        `;
+        return Promise.reject(error);
+      }
+    }
+
+    // ====== INITIALIZE ======
     function populateVersionDropdown() {
       const select = document.getElementById('version');
       bibleVersions.forEach(v => {
@@ -373,78 +842,34 @@
       });
     }
 
-    async function loadChapter() {
-      const version = document.getElementById('version').value;
-      const book = document.getElementById('book').value;
-      const chapter = document.getElementById('chapter').value;
-      const output = document.getElementById('output');
+    // ====== EVENT LISTENERS ======
+    document.addEventListener('DOMContentLoaded', () => {
+      // Set up event listeners
+      document.getElementById('darkModeToggle').addEventListener('click', toggleDarkMode);
+      document.getElementById('fontIncrease').addEventListener('click', () => adjustFontSize(1));
+      document.getElementById('fontDecrease').addEventListener('click', () => adjustFontSize(-1));
+      document.getElementById('showBookmarks').addEventListener('click', showBookmarks);
+      document.getElementById('loadChapterBtn').addEventListener('click', loadChapter);
 
-      if (!version || !book || !chapter) {
-        output.innerHTML = `
-          <div class="error">
-            <i class="fas fa-exclamation-circle"></i>
-            <p>Please select a version, book, and enter a chapter number</p>
-          </div>
-        `;
-        return;
+      // Check for saved preferences
+      if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
       }
+      updateDarkModeIcon();
 
-      output.innerHTML = `
-        <div class="loading">
-          <div class="spinner"></div>
-          <p>Loading chapter...</p>
-        </div>
-      `;
-
-      const url = `https://bible-api.com/${book}+${chapter}?translation=${version}`;
-
-      try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("Chapter not found. Please check your selection.");
-
-        const data = await response.json();
-        const verses = data.verses;
-
-        if (!verses || verses.length === 0) {
-          throw new Error("No verses found in this chapter.");
-        }
-
-        const bookName = data.book_name;
-        const versionName = bibleVersions.find(v => v.id === version)?.name || version;
-
-        let html = `
-          <div class="chapter-header">
-            <h2 class="chapter-title">${bookName} ${chapter}</h2>
-            <div class="chapter-meta">${versionName}</div>
-          </div>
-          <div class="verses">
-        `;
-
-        html += verses.map(v => `
-          <div class="verse">
-            <span class="verse-num">${v.verse}</span>
-            ${v.text}
-          </div>
-        `).join('');
-
-        html += `</div>`;
-        output.innerHTML = html;
-
-      } catch (error) {
-        output.innerHTML = `
-          <div class="error">
-            <i class="fas fa-exclamation-circle"></i>
-            <p>${error.message}</p>
-          </div>
-        `;
-      }
-    }
-
-    // Populate dropdowns on page load
-    window.onload = () => {
+      // Populate dropdowns
       populateVersionDropdown();
       populateBookDropdown();
-    };
+
+      // Set initial font size
+      const savedFontSize = localStorage.getItem('fontSize');
+      if (savedFontSize) {
+        const versesContainer = document.querySelector('.verses');
+        if (versesContainer) {
+          versesContainer.style.fontSize = `${savedFontSize}px`;
+        }
+      }
+    });
   </script>
 </body>
 </html>
