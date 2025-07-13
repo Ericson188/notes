@@ -306,28 +306,6 @@
       }
     }
 
-    @media (max-width: 480px) {
-      .container {
-        margin: 0.5rem auto;
-      }
-      
-      header {
-        padding: 1rem;
-      }
-      
-      h1 {
-        font-size: 1.5rem;
-      }
-      
-      .controls, .verses-container {
-        padding: 1rem;
-      }
-
-      .verse-actions {
-        opacity: 1;
-      }
-    }
-    
     .verse-header {
       display: flex;
       justify-content: space-between;
@@ -357,6 +335,80 @@
     
     .copy-notification.show {
       opacity: 1;
+    }
+
+    /* Mobile-specific styles */
+    @media (max-width: 480px) {
+      .container {
+        margin: 0;
+        border-radius: 0;
+      }
+      
+      body {
+        padding: 0;
+      }
+      
+      header {
+        padding: 1rem;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+      
+      .controls, .verses-container {
+        padding: 1rem 0.5rem;
+      }
+
+      .form-row {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      
+      .form-group {
+        margin-bottom: 0.5rem;
+      }
+      
+      .verse {
+        padding-right: 2.5rem;
+        padding-top: 1.5rem;
+      }
+      
+      .verse-actions {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        opacity: 1;
+        background: var(--bg);
+        border-radius: var(--radius);
+        padding: 0.2rem;
+        box-shadow: 0 0 4px rgba(0,0,0,0.1);
+      }
+      
+      .verse-btn {
+        width: 20px;
+        height: 20px;
+        font-size: 0.8rem;
+      }
+      
+      .verse-num {
+        display: inline-block;
+        margin-right: 0.5rem;
+      }
+      
+      .chapter-navigation {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      
+      .nav-btn {
+        width: 100%;
+      }
+
+      .verse-actions {
+        flex-direction: column;
+        gap: 0.2rem;
+      }
     }
   </style>
 </head>
