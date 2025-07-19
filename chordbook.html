@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChordBook | Your Digital Songbook</title>
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --secondary: #166088;
+            --dark: #0a2342;
+            --light: #f8f9fa;
+            --accent: #ff7e5f;
+            --paper: #fff9e6;
+            --staff-line: #333;
+            --playlist-bg: #f0f8ff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            transition: all 0.3s;
+        }
+        
+        #sideNav {
+            height: 100%;
+            width: 250px;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: -250px;
+            background-color: var(--dark);
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding-top: 60px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+        
+        #sideNav a {
+            padding: 15px 25px;
+            text-decoration: none;
+            font-size: 18px;
+            color: var(--light);
+            display: block;
+            transition: 0.3s;
+            border-left: 4px solid transparent;
+        }
+        
+        #sideNav a:hover {
+            background-color: var(--secondary);
+            border-left: 4px solid var(--accent);
+            color: white;
+        }
+        
+        #sideNav .closebtn {
+            position: absolute;
+            top: 0;
+            right: 25px;
+            font-size: 36px;
+            margin-left: 50px;
+            padding: 8px 15px;
+        }
+        
+        .container {
+            margin-left: 0;
+            padding: 20px;
+            transition: margin-left 0.5s;
+        }
+        
+        .open-nav {
+            margin-left: 250px;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+            margin: 5px 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            background-color: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        button.secondary-btn {
+            background-color: #6c757d;
+        }
+        
+        button.danger-btn {
+            background-color: #dc3545;
+        }
+        
+        button.success-btn {
+            background-color: #28a745;
+        }
+        
+        h1, h2, h3 {
+            color: var(--dark);
+            font-weight: 700;
+        }
+        
+        h1 {
+            margin: 20px 0;
+            font-size: 2rem;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        input[type="text"]:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 5px rgba(74, 111, 165, 0.5);
+        }
+        
+        textarea {
+            min-height: 200px;
+            resize: vertical;
+            font-family: monospace;
+            line-height: 1.5;
+        }
+        
+        .song-form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .search-container {
+            position: relative;
+            margin: 20px 0;
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+        }
+        
+        .chord-list {
+            margin-top: 30px;
+        }
+        
+        .chord-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            border-left: 5px solid var(--primary);
+            position: relative;
+        }
+        
+        .chord-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .chord-title {
+            font-size: 1.3rem;
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .chord-preview {
+            color: #666;
+            margin-bottom: 15px;
+            white-space: pre-line;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+        
+        .chord-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        
+        .view-btn {
+            background-color: var(--primary);
+        }
+        
+        .edit-btn {
+            background-color: #ffc107;
+            color: var(--dark);
+        }
+        
+        .delete-btn {
+            background-color: #dc3545;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 1% auto;
+            padding: 0;
+            border-radius: 10px;
+            width: 95%;
+            max-width: 900px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            position: relative;
+            animation: modalopen 0.4s;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        @keyframes modalopen {
+            from {opacity: 0; transform: translateY(-50px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+        
+        .lyrics-container {
+            background-color: white;
+            padding: 20px;
+            white-space: pre-line;
+            font-family: monospace;
+            line-height: 1.8;
+            font-size: 18px;
+            overflow-y: auto;
+            flex-grow: 1;
+            border: none;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #aaa;
+            z-index: 100;
+            background: white;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .close-modal:hover {
+            color: var(--dark);
+        }
+        
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .page-btn {
+            padding: 8px 12px;
+            background-color: #ddd;
+            color: var(--dark);
+            min-width: 40px;
+        }
+        
+        .page-btn.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        /* Music Staff Effect */
+        .music-staff {
+            position: relative;
+            height: 30px;
+            margin: 20px 0;
+            background: linear-gradient(to bottom, 
+                transparent 0%, transparent 15%, 
+                var(--staff-line) 15%, var(--staff-line) 20%,
+                transparent 20%, transparent 35%,
+                var(--staff-line) 35%, var(--staff-line) 40%,
+                transparent 40%, transparent 55%,
+                var(--staff-line) 55%, var(--staff-line) 60%,
+                transparent 60%, transparent 75%,
+                var(--staff-line) 75%, var(--staff-line) 80%,
+                transparent 80%, transparent 100%);
+        }
+        
+        /* Chord notation highlight */
+        .chord {
+            color: var(--accent);
+            font-weight: bold;
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .empty-state i {
+            font-size: 50px;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+        
+        /* Collection modal */
+        .collection-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .collection-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        /* Export buttons */
+        .export-options {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        /* Playlist styles */
+        .playlist-container {
+            background-color: var(--playlist-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .playlist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .playlist-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        
+        .playlist-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .playlist-item.active {
+            border-left: 4px solid var(--accent);
+            background-color: #f8f9fa;
+        }
+        
+        .playlist-item .song-info {
+            flex-grow: 1;
+        }
+        
+        .playlist-item .song-position {
+            margin-right: 15px;
+            font-weight: bold;
+            color: var(--primary);
+            min-width: 25px;
+            text-align: center;
+        }
+        
+        .playlist-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .playlist-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        /* Responsive */
+        @media (min-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .modal-content {
+                margin: 2% auto;
+            }
+            
+            .chord-actions {
+                flex-wrap: nowrap;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            button {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+            
+            .action-btn {
+                flex-grow: 1;
+                text-align: center;
+            }
+            
+            .chord-card {
+                padding: 15px;
+            }
+            
+            .lyrics-container {
+                font-size: 16px;
+                padding: 15px;
+            }
+            
+            .playlist-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .playlist-actions {
+                margin-top: 10px;
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+        
+        /* Modal header */
+        .modal-header {
+            padding: 15px 20px;
+            background-color: var(--primary);
+            color: white;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .modal-actions {
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <!-- Side Navigation -->
+    <div id="sideNav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div class="music-staff"></div>
+        <a href="#" onclick="clearForm(); closeNav()"><i class="fas fa-plus-circle"></i> Add New Song</a>
+        <a href="#" onclick="showAllSongs(); closeNav()"><i class="fas fa-music"></i> All Songs</a>
+        <a href="#" onclick="showCollections(); closeNav()"><i class="fas fa-folder"></i> Collections</a>
+        <a href="#" onclick="showPlaylist(); closeNav()"><i class="fas fa-list"></i> Concert Playlist</a>
+        <a href="#" onclick="showExportOptions(); closeNav()"><i class="fas fa-file-export"></i> Export</a>
+        <a href="#" onclick="closeNav()"><i class="fas fa-cog"></i> Settings</a>
+        <a href="#" onclick="closeNav()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        <div class="music-staff"></div>
+    </div>
+
+    <div class="container" id="mainContainer">
+        <!-- Button to open side nav -->
+        <button onclick="openNav()"><i class="fas fa-bars"></i> Menu</button>
+
+        <h1><i class="fas fa-guitar"></i> ChordBook</h1>
+        
+        <div class="song-form" id="songForm">
+            <input type="hidden" id="editId" value="">
+            <input type="text" id="title" placeholder="Song title (e.g. Wonderwall)">
+            <textarea id="lyrics" placeholder="Enter song lyrics with chords in brackets like [C] [G] [Am]..."></textarea>
+            <div class="music-staff"></div>
+            <button onclick="saveChord()"><i class="fas fa-save"></i> Save Song</button>
+            <button onclick="clearForm()" class="secondary-btn"><i class="fas fa-times"></i> Cancel</button>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="searchBar" placeholder="Search songs..." oninput="filterChords()">
+            <i class="fas fa-search search-icon"></i>
+        </div>
+        
+        <div class="export-options" id="exportOptions" style="display: none;">
+            <button onclick="exportAllSongsPDF()"><i class="fas fa-file-pdf"></i> Export All as PDF</button>
+            <button onclick="exportCurrentViewPDF()"><i class="fas fa-file-pdf"></i> Export Current View</button>
+            <button onclick="exportAllSongsTXT()"><i class="fas fa-file-alt"></i> Export All as Text</button>
+        </div>
+        
+        <div class="collections-container" id="collectionsContainer" style="display: none;">
+            <h2><i class="fas fa-folder"></i> My Collections</h2>
+            <button onclick="showNewCollectionForm()"><i class="fas fa-plus"></i> New Collection</button>
+            
+            <div id="newCollectionForm" style="display: none; margin-top: 20px;">
+                <input type="text" id="newCollectionName" placeholder="Collection name">
+                <button onclick="createCollection()"><i class="fas fa-save"></i> Create</button>
+                <button onclick="hideNewCollectionForm()" class="secondary-btn"><i class="fas fa-times"></i> Cancel</button>
+            </div>
+            
+            <div class="collection-list" id="collectionList"></div>
+        </div>
+        
+        <!-- Playlist Section -->
+        <div class="playlist-container" id="playlistContainer" style="display: none;">
+            <div class="playlist-header">
+                <h2><i class="fas fa-list-ol"></i> Concert Playlist</h2>
+                <button onclick="savePlaylist()" class="success-btn"><i class="fas fa-save"></i> Save Playlist</button>
+            </div>
+            
+            <div id="playlistItems">
+                <!-- Playlist items will be loaded here -->
+                <div class="empty-state">
+                    <i class="fas fa-music"></i>
+                    <h3>Your playlist is empty</h3>
+                    <p>Add songs from the All Songs view to create your concert playlist</p>
+                </div>
+            </div>
+            
+            <div class="playlist-controls">
+                <button onclick="playPreviousSong()" class="secondary-btn"><i class="fas fa-step-backward"></i> Previous</button>
+                <button onclick="playCurrentSong()" class="success-btn"><i class="fas fa-play"></i> Play Current</button>
+                <button onclick="playNextSong()" class="secondary-btn"><i class="fas fa-step-forward"></i> Next</button>
+                <button onclick="clearPlaylist()" class="danger-btn"><i class="fas fa-trash"></i> Clear Playlist</button>
+            </div>
+        </div>
+        
+        <div class="chord-list" id="chordList">
+            <!-- Songs will be loaded here -->
+        </div>
+        
+        <div class="pagination" id="pagination"></div>
+    </div>
+
+    <!-- Modal for viewing full lyrics -->
+    <div class="modal" id="lyricsModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div class="modal-header">
+                <h2 id="modalTitle"></h2>
+            </div>
+            <div class="music-staff"></div>
+            <div id="modalLyrics" class="lyrics-container"></div>
+            <div class="modal-actions">
+                <button onclick="editCurrentSong()"><i class="fas fa-edit"></i> Edit</button>
+                <button onclick="showAddToCollectionModal()"><i class="fas fa-folder-plus"></i> Add to Collection</button>
+                <button onclick="addToPlaylistFromModal()"><i class="fas fa-plus"></i> Add to Playlist</button>
+                <button onclick="closeModal()"><i class="fas fa-times"></i> Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for adding to collection -->
+    <div class="modal" id="collectionModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeCollectionModal()">&times;</span>
+            <h2>Add to Collection</h2>
+            <div class="music-staff"></div>
+            <div id="collectionOptions" class="collection-list"></div>
+            <button onclick="closeCollectionModal()"><i class="fas fa-times"></i> Close</button>
+        </div>
+    </div>
+
+    <!-- Modal for viewing a collection -->
+    <div class="modal" id="viewCollectionModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeViewCollectionModal()">&times;</span>
+            <h2 id="collectionModalTitle"></h2>
+            <div class="music-staff"></div>
+            <div class="export-options">
+                <button onclick="exportCollectionPDF()"><i class="fas fa-file-pdf"></i> Export as PDF</button>
+                <button onclick="exportCollectionTXT()"><i class="fas fa-file-alt"></i> Export as Text</button>
+            </div>
+            <div id="collectionSongsList" class="chord-list"></div>
+            <button onclick="closeViewCollectionModal()"><i class="fas fa-times"></i> Close</button>
+        </div>
+    </div>
+
+    <script>
+        // Storage keys
+        const SONGS_STORAGE_KEY = 'chordBookSongs';
+        const COLLECTIONS_STORAGE_KEY = 'chordBookCollections';
+        const PLAYLIST_STORAGE_KEY = 'chordBookPlaylist';
+        const CURRENT_SONG_INDEX_KEY = 'chordBookCurrentSongIndex';
+        
+        // Initialize jsPDF
+        const { jsPDF } = window.jspdf;
+        
+        // Load data from localStorage
+        let chords = loadSongs();
+        let collections = loadCollections();
+        let playlist = loadPlaylist();
+        let currentSongIndex = loadCurrentSongIndex();
+        
+        // If no chords in storage, initialize with sample data
+        if (chords.length === 0) {
+            chords = [
+                { id: 1, title: "Wonderwall", lyrics: "[C]Today is gonna be the [G]day\nThat they're gonna [Am]throw it back to [F]you\n[C]By now you should've [G]somehow\n[Am]Realized what you gotta [F]do"},
+                { id: 2, title: "Hotel California", lyrics: "[Bm]On a dark desert [F#]highway\n[G]Cool wind in my [D]hair\n[Em]Warm smell of [F#]colitas\n[A]Rising up through the [E]air"},
+                { id: 3, title: "Let It Be", lyrics: "[C]When I find myself in [G]times of trouble\n[Am]Mother Mary comes to [F]me\n[C]Speaking words of [G]wisdom\n[Am]Let it [F]be [C]"}
+            ];
+            saveSongs();
+        }
+        
+        // Initialize collections if empty
+        if (collections.length === 0) {
+            collections = [
+                { id: 1, name: "Favorites", songIds: [1, 3] },
+                { id: 2, name: "Practice List", songIds: [2] }
+            ];
+            saveCollections();
+        }
+        
+        let currentPage = 1;
+        const itemsPerPage = 5;
+        let currentViewingId = null;
+        let currentCollectionId = null;
+        
+        // DOM elements
+        const chordListEl = document.getElementById('chordList');
+        const paginationEl = document.getElementById('pagination');
+        const searchBarEl = document.getElementById('searchBar');
+        const titleInput = document.getElementById('title');
+        const lyricsInput = document.getElementById('lyrics');
+        const editIdInput = document.getElementById('editId');
+        const exportOptionsEl = document.getElementById('exportOptions');
+        const collectionsContainerEl = document.getElementById('collectionsContainer');
+        const collectionListEl = document.getElementById('collectionList');
+        const newCollectionFormEl = document.getElementById('newCollectionForm');
+        const playlistContainerEl = document.getElementById('playlistContainer');
+        const playlistItemsEl = document.getElementById('playlistItems');
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            showAllSongs();
+            renderPlaylist();
+        });
+        
+        // Data loading functions
+        function loadSongs() {
+            const storedSongs = localStorage.getItem(SONGS_STORAGE_KEY);
+            return storedSongs ? JSON.parse(storedSongs) : [];
+        }
+        
+        function loadCollections() {
+            const storedCollections = localStorage.getItem(COLLECTIONS_STORAGE_KEY);
+            return storedCollections ? JSON.parse(storedCollections) : [];
+        }
+        
+        function loadPlaylist() {
+            const storedPlaylist = localStorage.getItem(PLAYLIST_STORAGE_KEY);
+            return storedPlaylist ? JSON.parse(storedPlaylist) : [];
+        }
+        
+        function loadCurrentSongIndex() {
+            const storedIndex = localStorage.getItem(CURRENT_SONG_INDEX_KEY);
+            return storedIndex !== null ? parseInt(storedIndex) : -1;
+        }
+        
+        // Data saving functions
+        function saveSongs() {
+            localStorage.setItem(SONGS_STORAGE_KEY, JSON.stringify(chords));
+        }
+        
+        function saveCollections() {
+            localStorage.setItem(COLLECTIONS_STORAGE_KEY, JSON.stringify(collections));
+        }
+        
+        function savePlaylist() {
+            localStorage.setItem(PLAYLIST_STORAGE_KEY, JSON.stringify(playlist));
+        }
+        
+        function saveCurrentSongIndex() {
+            localStorage.setItem(CURRENT_SONG_INDEX_KEY, currentSongIndex);
+        }
+        
+        // Navigation functions
+        function openNav() {
+            document.getElementById('sideNav').style.left = "0";
+            document.getElementById('mainContainer').classList.add('open-nav');
+        }
+        
+        function closeNav() {
+            document.getElementById('sideNav').style.left = "-250px";
+            document.getElementById('mainContainer').classList.remove('open-nav');
+        }
+        
+        // View management functions
+        function showAllSongs() {
+            document.getElementById('songForm').style.display = 'block';
+            document.getElementById('exportOptions').style.display = 'none';
+            document.getElementById('collectionsContainer').style.display = 'none';
+            document.getElementById('playlistContainer').style.display = 'none';
+            currentCollectionId = null;
+            renderChordList();
+            renderPagination();
+        }
+        
+        function showCollections() {
+            document.getElementById('songForm').style.display = 'none';
+            document.getElementById('exportOptions').style.display = 'none';
+            document.getElementById('collectionsContainer').style.display = 'block';
+            document.getElementById('playlistContainer').style.display = 'none';
+            renderCollections();
+        }
+        
+        function showPlaylist() {
+            document.getElementById('songForm').style.display = 'none';
+            document.getElementById('exportOptions').style.display = 'none';
+            document.getElementById('collectionsContainer').style.display = 'none';
+            document.getElementById('playlistContainer').style.display = 'block';
+            renderPlaylist();
+        }
+        
+        function showExportOptions() {
+            document.getElementById('songForm').style.display = 'none';
+            document.getElementById('exportOptions').style.display = 'flex';
+            document.getElementById('collectionsContainer').style.display = 'none';
+            document.getElementById('playlistContainer').style.display = 'none';
+            currentCollectionId = null;
+            renderChordList();
+            renderPagination();
+        }
+        
+        // CRUD Operations for Songs
+        function saveChord() {
+            const title = titleInput.value.trim();
+            const lyrics = lyricsInput.value.trim();
+            const editId = editIdInput.value;
+            
+            if (!title || !lyrics) {
+                alert('Please enter both title and lyrics');
+                return;
+            }
+            
+            if (editId) {
+                // Update existing chord
+                const index = chords.findIndex(c => c.id == editId);
+                if (index !== -1) {
+                    chords[index] = { id: parseInt(editId), title, lyrics };
+                }
+            } else {
+                // Add new chord
+                const newId = chords.length > 0 ? Math.max(...chords.map(c => c.id)) + 1 : 1;
+                chords.push({ id: newId, title, lyrics });
+            }
+            
+            // Save to localStorage
+            saveSongs();
+            
+            // Reset form
+            clearForm();
+            
+            // Refresh UI
+            renderChordList();
+            renderPagination();
+            renderPlaylist();
+        }
+        
+        function editChord(id) {
+            const chord = chords.find(c => c.id == id);
+            if (chord) {
+                titleInput.value = chord.title;
+                lyricsInput.value = chord.lyrics;
+                editIdInput.value = chord.id;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+        
+        function deleteChord(id) {
+            if (confirm('Are you sure you want to delete this song?')) {
+                // Remove song from all collections first
+                collections.forEach(collection => {
+                    collection.songIds = collection.songIds.filter(songId => songId !== id);
+                });
+                saveCollections();
+                
+                // Remove from playlist
+                playlist = playlist.filter(songId => songId !== id);
+                savePlaylist();
+                
+                // Then delete the song
+                chords = chords.filter(c => c.id != id);
+                saveSongs();
+                
+                renderChordList();
+                renderPagination();
+                renderCollections();
+                renderPlaylist();
+                
+                // If we were viewing this song, close the modal
+                if (currentViewingId == id) {
+                    closeModal();
+                }
+            }
+        }
+        
+        function clearForm() {
+            titleInput.value = '';
+            lyricsInput.value = '';
+            editIdInput.value = '';
+        }
+        
+        // Collection functions
+        function showNewCollectionForm() {
+            newCollectionFormEl.style.display = 'block';
+        }
+        
+        function hideNewCollectionForm() {
+            newCollectionFormEl.style.display = 'none';
+            document.getElementById('newCollectionName').value = '';
+        }
+        
+        function createCollection() {
+            const name = document.getElementById('newCollectionName').value.trim();
+            if (!name) {
+                alert('Please enter a collection name');
+                return;
+            }
+            
+            const newId = collections.length > 0 ? Math.max(...collections.map(c => c.id)) + 1 : 1;
+            collections.push({ id: newId, name, songIds: [] });
+            saveCollections();
+            hideNewCollectionForm();
+            renderCollections();
+        }
+        
+        function deleteCollection(id) {
+            if (confirm('Are you sure you want to delete this collection? This will not delete the songs.')) {
+                collections = collections.filter(c => c.id != id);
+                saveCollections();
+                renderCollections();
+            }
+        }
+        
+        function renderCollections() {
+            collectionListEl.innerHTML = collections.map(collection => `
+                <div class="collection-item">
+                    <span>${collection.name} (${collection.songIds.length} songs)</span>
+                    <div>
+                        <button class="action-btn view-btn" onclick="viewCollection(${collection.id})">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="action-btn delete-btn" onclick="deleteCollection(${collection.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function viewCollection(id) {
+            const collection = collections.find(c => c.id == id);
+            if (collection) {
+                document.getElementById('collectionModalTitle').textContent = collection.name;
+                const songsListEl = document.getElementById('collectionSongsList');
+                
+                const collectionSongs = chords.filter(song => collection.songIds.includes(song.id));
+                
+                if (collectionSongs.length === 0) {
+                    songsListEl.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-music"></i>
+                            <h3>No songs in this collection</h3>
+                            <p>Add songs from the All Songs view</p>
+                        </div>
+                    `;
+                } else {
+                    songsListEl.innerHTML = collectionSongs.map(song => `
+                        <div class="chord-card">
+                            <h3 class="chord-title">${song.title}</h3>
+                            <div class="chord-preview">${song.lyrics.substring(0, 100)}${song.lyrics.length > 100 ? '...' : ''}</div>
+                            <div class="chord-actions">
+                                <button class="action-btn view-btn" onclick="viewChord(${song.id}, true)">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                <button class="action-btn success-btn" onclick="addToPlaylist(${song.id})">
+                                    <i class="fas fa-plus"></i> Add to Playlist
+                                </button>
+                                <button class="action-btn danger-btn" onclick="removeFromCollection(${song.id}, ${collection.id})">
+                                    <i class="fas fa-minus"></i> Remove
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+                
+                currentCollectionId = id;
+                document.getElementById('viewCollectionModal').style.display = 'block';
+            }
+        }
+        
+        function removeFromCollection(songId, collectionId) {
+            const collection = collections.find(c => c.id == collectionId);
+            if (collection) {
+                collection.songIds = collection.songIds.filter(id => id !== songId);
+                saveCollections();
+                viewCollection(collectionId);
+            }
+        }
+        
+        function showAddToCollectionModal() {
+            const collectionOptionsEl = document.getElementById('collectionOptions');
+            collectionOptionsEl.innerHTML = collections.map(collection => `
+                <div class="collection-item">
+                    <span>${collection.name}</span>
+                    <button class="action-btn ${collection.songIds.includes(currentViewingId) ? 'secondary-btn' : 'view-btn'}" 
+                            onclick="${collection.songIds.includes(currentViewingId) ? `removeFromCollectionModal(${collection.id})` : `addToCollection(${collection.id})`}">
+                        <i class="fas ${collection.songIds.includes(currentViewingId) ? 'fa-check' : 'fa-plus'}"></i> 
+                        ${collection.songIds.includes(currentViewingId) ? 'Added' : 'Add'}
+                    </button>
+                </div>
+            `).join('');
+            
+            document.getElementById('collectionModal').style.display = 'block';
+        }
+        
+        function addToCollection(collectionId) {
+            const collection = collections.find(c => c.id == collectionId);
+            if (collection && !collection.songIds.includes(currentViewingId)) {
+                collection.songIds.push(currentViewingId);
+                saveCollections();
+                showAddToCollectionModal();
+            }
+        }
+        
+        function removeFromCollectionModal(collectionId) {
+            const collection = collections.find(c => c.id == collectionId);
+            if (collection) {
+                collection.songIds = collection.songIds.filter(id => id !== currentViewingId);
+                saveCollections();
+                showAddToCollectionModal();
+            }
+        }
+        
+        // Playlist functions
+        function renderPlaylist() {
+            if (playlist.length === 0) {
+                playlistItemsEl.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-music"></i>
+                        <h3>Your playlist is empty</h3>
+                        <p>Add songs from the All Songs view to create your concert playlist</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            playlistItemsEl.innerHTML = playlist.map((songId, index) => {
+                const song = chords.find(c => c.id == songId);
+                if (!song) return '';
+                
+                return `
+                    <div class="playlist-item ${index === currentSongIndex ? 'active' : ''}" data-song-id="${song.id}">
+                        <div class="song-position">${index + 1}</div>
+                        <div class="song-info">
+                            <h3>${song.title}</h3>
+                            <p class="chord-preview">${song.lyrics.substring(0, 60)}${song.lyrics.length > 60 ? '...' : ''}</p>
+                        </div>
+                        <div class="playlist-actions">
+                            <button class="action-btn view-btn" onclick="viewChord(${song.id}, true)"><i class="fas fa-eye"></i></button>
+                            <button class="action-btn edit-btn" onclick="editChord(${song.id})"><i class="fas fa-edit"></i></button>
+                            <button class="action-btn delete-btn" onclick="removeFromPlaylist(${song.id})"><i class="fas fa-trash"></i></button>
+                            <button class="action-btn ${index === currentSongIndex ? 'success-btn' : 'secondary-btn'}" 
+                                    onclick="setCurrentSong(${index})">
+                                <i class="fas ${index === currentSongIndex ? 'fa-play' : 'fa-music'}"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function addToPlaylist(songId) {
+            if (!playlist.includes(songId)) {
+                playlist.push(songId);
+                savePlaylist();
+                renderPlaylist();
+                
+                // If this is the first song added, set it as current
+                if (playlist.length === 1) {
+                    currentSongIndex = 0;
+                    saveCurrentSongIndex();
+                }
+            }
+        }
+        
+        function addToPlaylistFromModal() {
+            if (currentViewingId) {
+                addToPlaylist(currentViewingId);
+            }
+        }
+        
+        function removeFromPlaylist(songId) {
+            const index = playlist.indexOf(songId);
+            if (index !== -1) {
+                playlist.splice(index, 1);
+                savePlaylist();
+                
+                // Adjust current song index if needed
+                if (currentSongIndex >= playlist.length) {
+                    currentSongIndex = playlist.length > 0 ? playlist.length - 1 : -1;
+                    saveCurrentSongIndex();
+                } else if (index < currentSongIndex) {
+                    currentSongIndex--;
+                    saveCurrentSongIndex();
+                }
+                
+                renderPlaylist();
+            }
+        }
+        
+        function clearPlaylist() {
+            if (confirm('Are you sure you want to clear the entire playlist?')) {
+                playlist = [];
+                currentSongIndex = -1;
+                savePlaylist();
+                saveCurrentSongIndex();
+                renderPlaylist();
+            }
+        }
+        
+        function setCurrentSong(index) {
+            currentSongIndex = index;
+            saveCurrentSongIndex();
+            renderPlaylist();
+        }
+        
+        function playCurrentSong() {
+            if (currentSongIndex >= 0 && currentSongIndex < playlist.length) {
+                const songId = playlist[currentSongIndex];
+                viewChord(songId, true);
+            } else {
+                alert('No song selected in playlist');
+            }
+        }
+        
+        function playNextSong() {
+            if (playlist.length === 0) return;
+            
+            currentSongIndex = (currentSongIndex + 1) % playlist.length;
+            saveCurrentSongIndex();
+            renderPlaylist();
+            playCurrentSong();
+        }
+        
+        function playPreviousSong() {
+            if (playlist.length === 0) return;
+            
+            currentSongIndex = (currentSongIndex - 1 + playlist.length) % playlist.length;
+            saveCurrentSongIndex();
+            renderPlaylist();
+            playCurrentSong();
+        }
+        
+        function savePlaylist() {
+            savePlaylist();
+            alert('Playlist saved!');
+        }
+        
+        // Viewing functions
+        function viewChord(id, fromCollection = false) {
+            const chord = chords.find(c => c.id == id);
+            if (chord) {
+                document.getElementById('modalTitle').textContent = chord.title;
+                
+                // Process lyrics to highlight chords
+                const processedLyrics = chord.lyrics.replace(/\[(.*?)\]/g, '<span class="chord">[$1]</span>');
+                document.getElementById('modalLyrics').innerHTML = processedLyrics;
+                
+                // Hide "Add to Collection" button if viewing from a collection
+                const addToCollectionBtn = document.querySelector('.modal-actions button:nth-child(2)');
+                if (addToCollectionBtn) {
+                    addToCollectionBtn.style.display = fromCollection ? 'none' : 'block';
+                }
+                
+                document.getElementById('lyricsModal').style.display = 'block';
+                currentViewingId = id;
+            }
+        }
+        
+        function editCurrentSong() {
+            if (currentViewingId) {
+                editChord(currentViewingId);
+                closeModal();
+            }
+        }
+        
+        function closeModal() {
+            document.getElementById('lyricsModal').style.display = 'none';
+            currentViewingId = null;
+        }
+        
+        function closeCollectionModal() {
+            document.getElementById('collectionModal').style.display = 'none';
+        }
+        
+        function closeViewCollectionModal() {
+            document.getElementById('viewCollectionModal').style.display = 'none';
+            currentCollectionId = null;
+        }
+        
+        // Filtering and pagination
+        function filterChords() {
+            currentPage = 1;
+            renderChordList();
+            renderPagination();
+        }
+        
+        function getFilteredChords() {
+            const searchTerm = searchBarEl.value.toLowerCase();
+            let filtered = chords;
+            
+            if (currentCollectionId) {
+                const collection = collections.find(c => c.id == currentCollectionId);
+                if (collection) {
+                    filtered = chords.filter(song => collection.songIds.includes(song.id));
+                }
+            }
+            
+            if (searchTerm) {
+                filtered = filtered.filter(c => 
+                    c.title.toLowerCase().includes(searchTerm) || 
+                    c.lyrics.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            return filtered;
+        }
+        
+        function getPaginatedChords() {
+            const filtered = getFilteredChords();
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            return filtered.slice(startIndex, startIndex + itemsPerPage);
+        }
+        
+        function changePage(page) {
+            currentPage = page;
+            renderChordList();
+            renderPagination();
+        }
+        
+        // Rendering functions
+        function renderChordList() {
+            const paginatedChords = getPaginatedChords();
+            const filteredChords = getFilteredChords();
+            
+            if (filteredChords.length === 0) {
+                const searchTerm = searchBarEl.value;
+                chordListEl.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-${searchTerm ? 'search' : 'music'}"></i>
+                        <h3>${searchTerm ? 'No songs found' : 'Your songbook is empty'}</h3>
+                        <p>${searchTerm ? 'Try a different search term' : 'Add your first song to get started!'}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            chordListEl.innerHTML = paginatedChords.map(chord => `
+                <div class="chord-card">
+                    <h3 class="chord-title">${chord.title}</h3>
+                    <div class="chord-preview">${chord.lyrics.substring(0, 100)}${chord.lyrics.length > 100 ? '...' : ''}</div>
+                    <div class="chord-actions">
+                        <button class="action-btn view-btn" onclick="viewChord(${chord.id})"><i class="fas fa-eye"></i> View</button>
+                        <button class="action-btn edit-btn" onclick="editChord(${chord.id})"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="action-btn success-btn" onclick="addToPlaylist(${chord.id})"><i class="fas fa-plus"></i> Add to Playlist</button>
+                        <button class="action-btn delete-btn" onclick="deleteChord(${chord.id})"><i class="fas fa-trash"></i> Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function renderPagination() {
+            const filteredChords = getFilteredChords();
+            const totalPages = Math.ceil(filteredChords.length / itemsPerPage);
+            
+            if (totalPages <= 1) {
+                paginationEl.innerHTML = '';
+                return;
+            }
+            
+            let paginationHTML = '';
+            
+            // Previous button
+            if (currentPage > 1) {
+                paginationHTML += `<button class="page-btn" onclick="changePage(${currentPage - 1})"><i class="fas fa-chevron-left"></i></button>`;
+            }
+            
+            // Page numbers
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            if (startPage > 1) {
+                paginationHTML += `<button class="page-btn" onclick="changePage(1)">1</button>`;
+                if (startPage > 2) {
+                    paginationHTML += `<span class="page-dots">...</span>`;
+                }
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHTML += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+            }
+            
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    paginationHTML += `<span class="page-dots">...</span>`;
+                }
+                paginationHTML += `<button class="page-btn" onclick="changePage(${totalPages})">${totalPages}</button>`;
+            }
+            
+            // Next button
+            if (currentPage < totalPages) {
+                paginationHTML += `<button class="page-btn" onclick="changePage(${currentPage + 1})"><i class="fas fa-chevron-right"></i></button>`;
+            }
+            
+            paginationEl.innerHTML = paginationHTML;
+        }
+        
+        // Export functions
+        function exportAllSongsPDF() {
+            exportSongsToPDF(chords, 'All_Songs');
+        }
+        
+        function exportCurrentViewPDF() {
+            const filteredChords = getFilteredChords();
+            exportSongsToPDF(filteredChords, 'Current_View_Songs');
+        }
+        
+        function exportCollectionPDF() {
+            if (!currentCollectionId) return;
+            
+            const collection = collections.find(c => c.id == currentCollectionId);
+            if (collection) {
+                const collectionSongs = chords.filter(song => collection.songIds.includes(song.id));
+                exportSongsToPDF(collectionSongs, collection.name.replace(/\s+/g, '_'));
+            }
+        }
+        
+        function exportSongsToPDF(songs, filename) {
+            const doc = new jsPDF();
+            let yPosition = 20;
+            
+            songs.forEach((song, index) => {
+                // Add song title
+                doc.setFontSize(16);
+                doc.text(song.title, 15, yPosition);
+                yPosition += 10;
+                
+                // Add lyrics with proper formatting
+                doc.setFontSize(12);
+                const lyricsLines = doc.splitTextToSize(song.lyrics, 180);
+                doc.text(lyricsLines, 15, yPosition);
+                
+                // Calculate new yPosition
+                yPosition += lyricsLines.length * 7 + 15;
+                
+                // Add page break if needed, except for last song
+                if (yPosition > 270 && index < songs.length - 1) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+            });
+            
+            doc.save(`${filename}.pdf`);
+        }
+        
+        function exportAllSongsTXT() {
+            exportSongsToTXT(chords, 'All_Songs');
+        }
+        
+        function exportCollectionTXT() {
+            if (!currentCollectionId) return;
+            
+            const collection = collections.find(c => c.id == currentCollectionId);
+            if (collection) {
+                const collectionSongs = chords.filter(song => collection.songIds.includes(song.id));
+                exportSongsToTXT(collectionSongs, collection.name.replace(/\s+/g, '_'));
+            }
+        }
+        
+        function exportSongsToTXT(songs, filename) {
+            let textContent = '';
+            
+            songs.forEach(song => {
+                textContent += `${song.title}\n\n`;
+                textContent += `${song.lyrics}\n\n`;
+                textContent += '--------------------------------\n\n';
+            });
+            
+            const blob = new Blob([textContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${filename}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Close modals if clicked outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                closeModal();
+                closeCollectionModal();
+                closeViewCollectionModal();
+            }
+        }
+        
+        // Keyboard shortcuts for playlist navigation
+        document.addEventListener('keydown', function(e) {
+            // Don't trigger if we're typing in an input field
+            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+                return;
+            }
+            
+            if (e.key === 'ArrowRight') {
+                playNextSong();
+            } else if (e.key === 'ArrowLeft') {
+                playPreviousSong();
+            } else if (e.key === ' ') {
+                e.preventDefault();
+                playCurrentSong();
+            }
+        });
+    </script>
+</body>
+</html>
