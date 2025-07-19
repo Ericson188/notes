@@ -791,7 +791,7 @@
             renderPagination();
         }
         
-        // CRUD Operations for Songs
+        // CRUD Operations for Songs - FIXED VERSION
         function saveChord() {
             const title = titleInput.value.trim();
             const lyrics = lyricsInput.value.trim();
@@ -806,7 +806,7 @@
                 // Update existing chord
                 const index = chords.findIndex(c => c.id == editId);
                 if (index !== -1) {
-                    chords[index] = { id: parseInt(editId), title, lyrics };
+                    chords[index] = { ...chords[index], title, lyrics };
                 }
             } else {
                 // Add new chord
@@ -1123,7 +1123,7 @@
         }
         
         function savePlaylist() {
-            savePlaylist();
+            localStorage.setItem(PLAYLIST_STORAGE_KEY, JSON.stringify(playlist));
             alert('Playlist saved!');
         }
         
