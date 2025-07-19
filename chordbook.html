@@ -6,8 +6,8 @@
     <title>ChordBook | Your Digital Songbook</title>
     <style>
         :root {
-            --primary: #4a6fa5;
-            --secondary: #166088;
+            --primary: #8E44AD;
+            --secondary: #8E44AD;
             --dark: #0a2342;
             --light: #f8f9fa;
             --accent: #ff7e5f;
@@ -535,11 +535,11 @@
         <!-- Button to open side nav -->
         <button onclick="openNav()"><i class="fas fa-bars"></i> Menu</button>
 
-        <h1><i class="fas fa-guitar"></i> ChordBook</h1>
+        <h1><i class="fas fa-guitar"></i> Echoes of His Goodness</h1>
         
         <div class="song-form" id="songForm">
             <input type="hidden" id="editId" value="">
-            <input type="text" id="title" placeholder="Song title (e.g. Wonderwall)">
+            <input type="text" id="title" placeholder="Song title (Echoes of His Goodness)">
             <textarea id="lyrics" placeholder="Enter song lyrics with chords in brackets like [C] [G] [Am]..."></textarea>
             <div class="music-staff"></div>
             <button onclick="saveChord()"><i class="fas fa-save"></i> Save Song</button>
@@ -664,9 +664,9 @@
         // If no chords in storage, initialize with sample data
         if (chords.length === 0) {
             chords = [
-                { id: 1, title: "Wonderwall", lyrics: "[C]Today is gonna be the [G]day\nThat they're gonna [Am]throw it back to [F]you\n[C]By now you should've [G]somehow\n[Am]Realized what you gotta [F]do"},
-                { id: 2, title: "Hotel California", lyrics: "[Bm]On a dark desert [F#]highway\n[G]Cool wind in my [D]hair\n[Em]Warm smell of [F#]colitas\n[A]Rising up through the [E]air"},
-                { id: 3, title: "Let It Be", lyrics: "[C]When I find myself in [G]times of trouble\n[Am]Mother Mary comes to [F]me\n[C]Speaking words of [G]wisdom\n[Am]Let it [F]be [C]"}
+                { id: 1, title: "", lyrics: ""},
+                { id: 2, title: "", lyrics: ""},
+                { id: 3, title: "", lyrics: ""}
             ];
             saveSongs();
         }
