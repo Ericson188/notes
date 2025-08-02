@@ -1,0 +1,563 @@
+:root {
+    --primary: #8E44AD;
+    --secondary: #8E44AD;
+    --dark: #0a2342;
+    --light: #f8f9fa;
+    --accent: #ff7e5f;
+    --paper: #fff9e6;
+    --staff-line: #333;
+    --playlist-bg: #f0f8ff;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--light);
+    color: var(--dark);
+    transition: all 0.3s;
+}
+
+#sideNav {
+    height: 100%;
+    width: 250px;
+    position: fixed;
+    z-index: 1000;
+    top: 0;
+    left: -250px;
+    background-color: var(--dark);
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+}
+
+#sideNav a {
+    padding: 15px 25px;
+    text-decoration: none;
+    font-size: 18px;
+    color: var(--light);
+    display: block;
+    transition: 0.3s;
+    border-left: 4px solid transparent;
+}
+
+#sideNav a:hover {
+    background-color: var(--secondary);
+    border-left: 4px solid var(--accent);
+    color: white;
+}
+
+#sideNav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+    padding: 8px 15px;
+}
+
+.container {
+    margin-left: 0;
+    padding: 20px;
+    transition: margin-left 0.5s;
+}
+
+.open-nav {
+    margin-left: 250px;
+}
+
+button {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 10px;
+    transition: all 0.3s;
+    margin: 5px 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+button:hover {
+    background-color: var(--secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+button.secondary-btn {
+    background-color: #6c757d;
+}
+
+button.danger-btn {
+    background-color: #dc3545;
+}
+
+button.success-btn {
+    background-color: #28a745;
+}
+
+h1, h2, h3 {
+    color: var(--dark);
+    font-weight: 700;
+}
+
+h1 {
+    margin: 20px 0;
+    font-size: 2rem;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+input[type="text"], textarea, select {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+input[type="text"]:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 5px rgba(74, 111, 165, 0.5);
+}
+
+textarea {
+    min-height: 200px;
+    resize: vertical;
+    font-family: monospace;
+    line-height: 1.5;
+}
+
+.song-form {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.search-container {
+    position: relative;
+    margin: 20px 0;
+}
+
+.search-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #aaa;
+}
+
+.chord-list {
+    margin-top: 30px;
+}
+
+.chord-card {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: all 0.3s;
+    border-left: 5px solid var(--primary);
+    position: relative;
+}
+
+.chord-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.chord-title {
+    font-size: 1.3rem;
+    color: var(--dark);
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.chord-preview {
+    color: #666;
+    margin-bottom: 15px;
+    white-space: pre-line;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.chord-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+.view-btn {
+    background-color: var(--primary);
+}
+
+.edit-btn {
+    background-color: #ffc107;
+    color: var(--dark);
+}
+
+.delete-btn {
+    background-color: #dc3545;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.7);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 1% auto;
+    padding: 0;
+    border-radius: 10px;
+    width: 95%;
+    max-width: 900px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    position: relative;
+    animation: modalopen 0.4s;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+@keyframes modalopen {
+    from {opacity: 0; transform: translateY(-50px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+.lyrics-container {
+    background-color: white;
+    padding: 20px;
+    white-space: pre-line;
+    font-family: monospace;
+    line-height: 1.8;
+    font-size: 18px;
+    overflow-y: auto;
+    flex-grow: 1;
+    border: none;
+}
+
+.close-modal {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #aaa;
+    z-index: 100;
+    background: white;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.close-modal:hover {
+    color: var(--dark);
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.page-btn {
+    padding: 8px 12px;
+    background-color: #ddd;
+    color: var(--dark);
+    min-width: 40px;
+}
+
+.page-btn.active {
+    background-color: var(--primary);
+    color: white;
+}
+
+/* Music Staff Effect */
+.music-staff {
+    position: relative;
+    height: 30px;
+    margin: 20px 0;
+    background: linear-gradient(to bottom, 
+        transparent 0%, transparent 15%, 
+        var(--staff-line) 15%, var(--staff-line) 20%,
+        transparent 20%, transparent 35%,
+        var(--staff-line) 35%, var(--staff-line) 40%,
+        transparent 40%, transparent 55%,
+        var(--staff-line) 55%, var(--staff-line) 60%,
+        transparent 60%, transparent 75%,
+        var(--staff-line) 75%, var(--staff-line) 80%,
+        transparent 80%, transparent 100%);
+}
+
+/* Chord notation highlight */
+.chord {
+    color: var(--accent);
+    font-weight: bold;
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+.empty-state i {
+    font-size: 50px;
+    margin-bottom: 20px;
+    color: #ddd;
+}
+
+/* Collection modal */
+.collection-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.collection-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Export buttons */
+.export-options {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+/* Playlist styles */
+.playlist-container {
+    background-color: var(--playlist-bg);
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 30px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.playlist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.playlist-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: white;
+    border-radius: 5px;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: all 0.3s;
+}
+
+.playlist-item:hover {
+    transform: translateX(5px);
+}
+
+.playlist-item.active {
+    border-left: 4px solid var(--accent);
+    background-color: #f8f9fa;
+}
+
+.playlist-item .song-info {
+    flex-grow: 1;
+}
+
+.playlist-item .song-position {
+    margin-right: 15px;
+    font-weight: bold;
+    color: var(--primary);
+    min-width: 25px;
+    text-align: center;
+}
+
+.playlist-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.playlist-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+/* Responsive */
+@media (min-width: 768px) {
+    h1 {
+        font-size: 2.5rem;
+    }
+    
+    .modal-content {
+        margin: 2% auto;
+    }
+    
+    .chord-actions {
+        flex-wrap: nowrap;
+    }
+}
+
+@media (max-width: 480px) {
+    button {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+    
+    .action-btn {
+        flex-grow: 1;
+        text-align: center;
+    }
+    
+    .chord-card {
+        padding: 15px;
+    }
+    
+    .lyrics-container {
+        font-size: 16px;
+        padding: 15px;
+    }
+    
+    .playlist-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .playlist-actions {
+        margin-top: 10px;
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+/* Modal header */
+.modal-header {
+    padding: 15px 20px;
+    background-color: var(--primary);
+    color: white;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.modal-actions {
+    padding: 10px 20px;
+    background-color: #f8f9fa;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+}
+
+/* Previous CSS remains the same, just add these new styles */
+
+.modal-actions {
+    padding: 10px 20px;
+    background-color: #f8f9fa;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    justify-content: center;
+}
+
+.modal-actions button {
+    flex-grow: 1;
+    min-width: 120px;
+    margin: 5px;
+}
+
+.playlist-view .modal-actions {
+    justify-content: space-between;
+}
+
+.playlist-view .modal-actions button {
+    flex-grow: 0;
+    min-width: auto;
+    padding: 10px 15px;
+}
+
+.playlist-view .modal-actions .nav-btn {
+    min-width: 100px;
+}
+
+@media (max-width: 480px) {
+    .modal-actions {
+        flex-direction: column;
+    }
+    
+    .modal-actions button {
+        width: 100%;
+        margin: 5px 0;
+    }
+    
+    .playlist-view .modal-actions {
+        flex-direction: row;
+        flex-wrap: nowrap;
+    }
+    
+    .playlist-view .modal-actions button {
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+}
